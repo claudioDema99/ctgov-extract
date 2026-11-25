@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ctgov-extract</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div>
+        <h1>ctgov-extract</h1>
+        <p class="subtitle">Structured eligibility criteria from ClinicalTrials.gov, with evidence spans.</p>
+      </div>
+      <div id="health" class="health" aria-live="polite">Checking backend...</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="form" class="card form" autocomplete="off">
+      <div class="row">
+        <label class="grow">
+          <span class="label">Trial</span>
+          <input id="trial" name="trial" type="text" required
+                 placeholder="NCT03887455 or https://clinicaltrials.gov/study/NCT03887455">
+        </label>
+        <fieldset class="mode" aria-label="Extraction mode">
+          <span class="label">Mode</span>
+          <div class="segmented">
+            <input type="radio" id="mode-default" name="mode" value="criteria" checked>
+            <label for="mode-default">Default criteria</label>
+            <input type="radio" id="mode-custom" name="mode" value="custom">
+            <label for="mode-custom">Custom schema</label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div id="schema-box" class="schema-box" hidden>
+        <div class="row schema-head">
+          <span class="label">Schema (YAML or JSON)</span>
+          <select id="schema-select" aria-label="Load an example schema"></select>
+        </div>
+        <textarea id="schema" spellcheck="false" rows="14"></textarea>
+      </div>
+
+      <div class="actions">
+        <button id="extract" type="submit" class="primary">Extract</button>
+        <button id="fetch-only" type="button">Fetch record only</button>
+        <button id="download" type="button" disabled>Download JSON</button>
+        <span id="status" class="status" aria-live="polite"></span>
+      </div>
+      <div id="error" class="error" role="alert" hidden></div>
+    </form>
+
+    <section id="results" hidden>
+      <article id="summary" class="card summary"></article>
+      <div id="stats" class="stats"></div>
+
+      <div class="split">
+        <div class="tables">
+          <div id="criteria-view">
+            <h2>Inclusion</h2>
+            <div id="inclusion"></div>
+            <h2>Exclusion</h2>
+            <div id="exclusion"></div>
+            <div id="failures"></div>
+          </div>
+          <div id="custom-view" hidden>
+            <div id="custom-tables"></div>
+            <h2>Result JSON</h2>
+            <pre id="custom-json" class="json"></pre>
+          </div>
+        </div>
+        <aside class="source card">
+          <div class="source-head">
+            <h2>Eligibility text</h2>
+            <span class="hint">Click a row to highlight its evidence</span>
+          </div>
+          <div id="source-text" class="source-text"></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap footer">
+    Model output can be wrong. Check every item against the highlighted evidence before using it.
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

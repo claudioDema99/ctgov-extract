@@ -1,0 +1,41 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Point this at your model server. With the vllm service below: http://vllm:8000/v1
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MAX_CONCURRENCY: ${LLM_MAX_CONCURRENCY:-4}
+    volumes:
+      - ctgov-cache:/home/app/.cache/ctgov-extract
+    restart: unless-stopped
+
+  # Optional local model server (needs an NVIDIA GPU and the NVIDIA container toolkit).
+  # Uncomment, pin an image tag you have tested, then set
+  #   LLM_BASE_URL=http://vllm:8000/v1  LLM_MODEL=Qwen/Qwen2.5-7B-Instruct
+  #
+  # vllm:
+  #   image: vllm/vllm-openai:latest
+  #   command: >
+  #     --model Qwen/Qwen2.5-7B-Instruct
+  #     --max-model-len 8192
+  #     --gpu-memory-utilization 0.90
+  #   ports:
+  #     - "8001:8000"
+  #   volumes:
+  #     - hf-cache:/root/.cache/huggingface
+  #   ipc: host
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]
+
+volumes:
+  ctgov-cache:
+  # hf-cache:

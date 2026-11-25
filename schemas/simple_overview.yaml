@@ -1,0 +1,21 @@
+# A small schema to try the custom mode quickly.
+name: simple_overview
+description: A short screening overview of a trial.
+fields:
+  - name: population
+    type: string
+    required: true
+    description: One sentence describing who can enrol.
+  - name: min_age_years
+    type: integer
+  - name: max_age_years
+    type: integer
+  - name: requires_prior_treatment
+    type: boolean
+    description: True if participants must have received a specific prior therapy.
+  - name: key_exclusions
+    type: list[string]
+    description: Up to five of the most restrictive exclusion criteria, short phrases.
+  - name: design
+    type: enum
+    enum: [randomized, single-arm, non-randomized, observational, other]

@@ -1,0 +1,43 @@
+# Biomarker requirements and thresholds in oncology eligibility criteria.
+name: oncology_biomarkers
+description: Molecular, protein and lab biomarkers used to select or exclude participants.
+instructions: |
+  Include tumour biomarkers (HER2, PD-L1, EGFR, ALK, BRAF, MSI...) and laboratory or
+  physiological thresholds (LVEF, QTc, ANC, creatinine...). One item per biomarker and
+  threshold. Copy the evidence text exactly from the eligibility criteria.
+fields:
+  - name: biomarkers
+    type: list[object]
+    required: true
+    description: Every biomarker or lab threshold mentioned in the eligibility criteria.
+    fields:
+      - name: name
+        type: string
+        required: true
+        description: Biomarker or measurement, e.g. "HER2", "PD-L1 TPS", "LVEF".
+      - name: kind
+        type: enum
+        enum: [inclusion, exclusion]
+        required: true
+      - name: biomarker_type
+        type: enum
+        enum: [genomic, protein expression, laboratory, physiological, imaging, other]
+      - name: requirement
+        type: string
+        description: Required status in words, e.g. "positive", "not mutated", "below threshold".
+      - name: operator
+        type: enum
+        enum: ["=", "!=", "<", "<=", ">", ">=", "between", "present", "absent"]
+      - name: threshold
+        type: number
+      - name: threshold_max
+        type: number
+      - name: unit
+        type: string
+      - name: assay_or_method
+        type: string
+        description: Assay, guideline or lab mentioned (e.g. "central laboratory", "ASCO-CAP").
+      - name: evidence
+        type: string
+        required: true
+        description: Verbatim quote from the eligibility criteria.

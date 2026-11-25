@@ -1,0 +1,54 @@
+# Cognitive, functional and biomarker cut-offs in neurodegenerative disease trials.
+name: neuro_cognitive_scores
+description: Cognitive and functional scales with cut-offs, plus amyloid/tau/genetic requirements.
+instructions: |
+  List each scale cut-off separately (for example MMSE and CDR are two items, and
+  "CDR global 0.5 and CDR memory box >= 0.5" are two items). Use the scale's usual
+  abbreviation as the name. Copy the evidence text exactly from the eligibility criteria.
+fields:
+  - name: scales
+    type: list[object]
+    required: true
+    description: Cognitive or functional scale cut-offs (MMSE, MoCA, CDR, CDR-SB, ADAS-Cog, FAQ, GDS...).
+    fields:
+      - name: scale
+        type: string
+        required: true
+      - name: kind
+        type: enum
+        enum: [inclusion, exclusion]
+        required: true
+      - name: operator
+        type: enum
+        enum: ["=", "<", "<=", ">", ">=", "between"]
+      - name: min_value
+        type: number
+      - name: max_value
+        type: number
+      - name: timepoint
+        type: string
+        description: When the score is assessed, e.g. "screening and baseline".
+      - name: evidence
+        type: string
+        required: true
+        description: Verbatim quote from the eligibility criteria.
+  - name: disease_biomarkers
+    type: list[object]
+    description: Amyloid, tau, neurofilament or genetic requirements (APOE4, PSEN1...).
+    fields:
+      - name: biomarker
+        type: string
+        required: true
+      - name: modality
+        type: enum
+        enum: [PET, CSF, plasma, genetic, MRI, other]
+      - name: requirement
+        type: string
+      - name: evidence
+        type: string
+        required: true
+  - name: diagnosis_stage
+    type: list[string]
+    description: Disease stages eligible for the trial, e.g. "MCI due to AD", "mild AD dementia".
+  - name: requires_study_partner
+    type: boolean
