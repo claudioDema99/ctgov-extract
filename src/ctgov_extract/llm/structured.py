@@ -6,17 +6,18 @@ import json
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
+from ctgov_extract.config import OutputMode
 from ctgov_extract.errors import StructuredOutputError, UnsupportedResponseFormatError
 from ctgov_extract.llm.base import ChatMessage, LLMClient, LLMResponse
 from ctgov_extract.models import Usage
 
 logger = logging.getLogger(__name__)
 
-OutputMode = Literal["json_schema", "json_object", "text"]
+# Fallback order, from the most constrained mode to plain text.
 MODES: tuple[OutputMode, ...] = ("json_schema", "json_object", "text")
 
 _FENCE = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL | re.IGNORECASE)
@@ -87,17 +88,18 @@ class StructuredResult[T: BaseModel]:
 class StructuredGenerator:
     """Ask a model for JSON matching a Pydantic model.
 
-    The first call tries ``response_format=json_schema``. If the backend rejects
-    it, the generator falls back to ``json_object`` and then to plain text (the
-    schema is always in the prompt, so plain text still works with most
-    instruction-tuned models). The working mode is remembered for later calls.
+    The schema is always in the prompt. By default (``text``) nothing else is sent,
+    which works with any chat endpoint. ``json_object`` and ``json_schema`` also send
+    ``response_format`` so the server can constrain decoding; if the backend
+    rejects it, the generator falls back towards ``text`` and remembers the
+    working mode for later calls.
 
     If the output does not parse or validate, the errors are sent back to the
     model once ("repair round"). A second failure raises
     :class:`StructuredOutputError`.
     """
 
-    def __init__(self, client: LLMClient, *, start_mode: OutputMode = "json_schema") -> None:
+    def __init__(self, client: LLMClient, *, start_mode: OutputMode = "text") -> None:
         self.client = client
         self._mode_index = MODES.index(start_mode)
 

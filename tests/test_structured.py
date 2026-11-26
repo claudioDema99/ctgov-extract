@@ -44,9 +44,19 @@ def test_extract_json_ignores_unclosed_thinking_block() -> None:
         extract_json('<think>the answer could be {"a": 1} but')
 
 
-def test_json_schema_mode_first() -> None:
+def test_default_mode_sends_schema_in_prompt_only() -> None:
     client = FakeLLMClient(responses=['{"name": "MMSE", "score": 22}'])
     result = asyncio.run(StructuredGenerator(client).generate(MESSAGES, Answer))
+    assert result.value == Answer(name="MMSE", score=22)
+    assert result.mode == "text"
+    assert client.calls[0].response_format is None
+
+
+def test_json_schema_mode_first() -> None:
+    client = FakeLLMClient(responses=['{"name": "MMSE", "score": 22}'])
+    result = asyncio.run(
+        StructuredGenerator(client, start_mode="json_schema").generate(MESSAGES, Answer)
+    )
     assert result.value == Answer(name="MMSE", score=22)
     assert result.mode == "json_schema"
     assert result.attempts == 1 and not result.repaired
@@ -61,7 +71,7 @@ def test_falls_back_to_json_object_then_text_and_remembers() -> None:
         responses=['{"name": "a", "score": 1}', '{"name": "b", "score": 2}'],
         unsupported_formats=["json_schema", "json_object"],
     )
-    gen = StructuredGenerator(client)
+    gen = StructuredGenerator(client, start_mode="json_schema")
     first = asyncio.run(gen.generate(MESSAGES, Answer))
     assert first.mode == "text"
     assert client.calls[0].response_format is None
@@ -74,7 +84,9 @@ def test_fallback_stops_at_json_object_when_supported() -> None:
     client = FakeLLMClient(
         responses=['{"name": "a", "score": 1}'], unsupported_formats=["json_schema"]
     )
-    result = asyncio.run(StructuredGenerator(client).generate(MESSAGES, Answer))
+    result = asyncio.run(
+        StructuredGenerator(client, start_mode="json_schema").generate(MESSAGES, Answer)
+    )
     assert result.mode == "json_object"
     assert client.calls[0].response_format == {"type": "json_object"}
 
@@ -83,7 +95,9 @@ def test_repair_round_sends_errors_back() -> None:
     client = FakeLLMClient(
         responses=['{"name": "MMSE", "score": "twenty-two"}', '{"name": "MMSE", "score": 22}']
     )
-    result = asyncio.run(StructuredGenerator(client).generate(MESSAGES, Answer))
+    result = asyncio.run(
+        StructuredGenerator(client, start_mode="json_schema").generate(MESSAGES, Answer)
+    )
     assert result.repaired and result.attempts == 2
     assert result.value.score == 22
     assert result.usage.calls == 2
@@ -97,7 +111,9 @@ def test_repair_round_sends_errors_back() -> None:
 
 def test_repair_round_handles_non_json() -> None:
     client = FakeLLMClient(responses=["I cannot do that.", '{"name": "x", "score": 0}'])
-    result = asyncio.run(StructuredGenerator(client).generate(MESSAGES, Answer))
+    result = asyncio.run(
+        StructuredGenerator(client, start_mode="json_schema").generate(MESSAGES, Answer)
+    )
     assert result.repaired
     assert "No JSON object found" in client.calls[1].messages[-1].content
 
@@ -105,7 +121,9 @@ def test_repair_round_handles_non_json() -> None:
 def test_second_failure_raises_with_details() -> None:
     client = FakeLLMClient(responses=['{"name": 1}', '{"name": "x"}'])
     with pytest.raises(StructuredOutputError) as info:
-        asyncio.run(StructuredGenerator(client).generate(MESSAGES, Answer))
+        asyncio.run(
+            StructuredGenerator(client, start_mode="json_schema").generate(MESSAGES, Answer)
+        )
     assert info.value.raw_output == '{"name": "x"}'
     assert any("score" in e for e in info.value.errors)
 
@@ -116,14 +134,18 @@ def test_all_modes_unsupported_raises() -> None:
 
     client = FakeLLMClient(responder=responder, unsupported_formats=["json_schema", "json_object"])
     with pytest.raises(UnsupportedResponseFormatError):
-        asyncio.run(StructuredGenerator(client).generate(MESSAGES, Answer))
+        asyncio.run(
+            StructuredGenerator(client, start_mode="json_schema").generate(MESSAGES, Answer)
+        )
 
 
 def test_custom_schema_and_name_are_used() -> None:
     client = FakeLLMClient(responses=[json.dumps({"name": "n", "score": 1})])
     schema = {"type": "object", "title": "custom"}
     asyncio.run(
-        StructuredGenerator(client).generate(MESSAGES, Answer, name="my schema!", schema=schema)
+        StructuredGenerator(client, start_mode="json_schema").generate(
+            MESSAGES, Answer, name="my schema!", schema=schema
+        )
     )
     fmt = client.calls[0].response_format
     assert fmt is not None

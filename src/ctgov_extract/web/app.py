@@ -158,7 +158,9 @@ def create_app(
     @app.post("/api/criteria")
     async def criteria(body: CriteriaRequest) -> CriteriaResponse:
         record = await resolve_trial(body.trial, services.ctgov, allow_files=False)
-        result = await CriteriaExtractor(services.llm()).extract_text(
+        result = await CriteriaExtractor(
+            services.llm(), output_mode=settings.llm_output_mode
+        ).extract_text(
             record.eligibility_text,
             nct_id=record.nct_id,
             title=record.brief_title,
@@ -170,7 +172,9 @@ def create_app(
     async def extract(body: ExtractRequest) -> ExtractResponse:
         spec = parse_schema_text(body.schema_text)
         record = await resolve_trial(body.trial, services.ctgov, allow_files=False)
-        result = await CustomExtractor(services.llm()).extract(record, spec)
+        result = await CustomExtractor(
+            services.llm(), output_mode=settings.llm_output_mode
+        ).extract(record, spec)
         return ExtractResponse(trial=record, result=result)
 
     @app.get("/", include_in_schema=False)

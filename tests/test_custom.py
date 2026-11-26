@@ -45,7 +45,8 @@ def test_custom_extraction_with_repair() -> None:
     assert result.nct_id == "NCT03529110"
     assert result.schema_name == "oncology_biomarkers"
     assert result.repaired
-    assert result.output_mode == "json_schema"
+    assert result.output_mode == "text"
+    assert all(call.response_format is None for call in client.calls)
     assert result.data["biomarkers"][1]["threshold"] == 50.0
     assert result.data["biomarkers"][1]["assay_or_method"] is None
     statuses = [c.status for c in result.evidence_checks]

@@ -7,7 +7,10 @@ import os
 from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
+
+OutputMode = Literal["text", "json_object", "json_schema"]
+OUTPUT_MODES: tuple[OutputMode, ...] = ("text", "json_object", "json_schema")
 
 
 def _default_cache_dir(env: Mapping[str, str]) -> Path:
@@ -35,6 +38,13 @@ def _json_object(env: Mapping[str, str], key: str) -> dict[str, Any] | None:
     return value
 
 
+def _output_mode(env: Mapping[str, str]) -> OutputMode:
+    raw = (env.get("LLM_OUTPUT_MODE") or "text").strip().lower()
+    if raw not in OUTPUT_MODES:
+        raise ValueError(f"LLM_OUTPUT_MODE must be one of {', '.join(OUTPUT_MODES)}, got {raw!r}.")
+    return raw
+
+
 @dataclass(frozen=True)
 class Settings:
     """All tunables in one place. Use :meth:`from_env` in applications."""
@@ -48,6 +58,7 @@ class Settings:
     llm_max_retries: int = 3
     llm_max_tokens: int | None = None
     llm_extra_body: dict[str, Any] | None = None
+    llm_output_mode: OutputMode = "text"
     ctgov_base_url: str = "https://clinicaltrials.gov/api/v2"
     ctgov_timeout_s: float = 30.0
     cache_dir: Path | None = None
@@ -76,6 +87,7 @@ class Settings:
             llm_max_retries=_int(env, "LLM_MAX_RETRIES", 3),
             llm_max_tokens=int(max_tokens) if max_tokens else None,
             llm_extra_body=_json_object(env, "LLM_EXTRA_BODY"),
+            llm_output_mode=_output_mode(env),
             ctgov_timeout_s=_float(env, "CTGOV_TIMEOUT", 30.0),
             cache_dir=cache_dir,
             cache_ttl_s=_float(env, "CTGOV_CACHE_TTL", 7 * 24 * 3600),

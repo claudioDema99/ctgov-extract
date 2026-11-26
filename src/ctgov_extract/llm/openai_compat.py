@@ -126,7 +126,9 @@ class OpenAICompatClient:
                     if not isinstance(body, dict):
                         raise LLMError("LLM backend returned an unexpected payload.")
                     return body
-                if has_format and status in (400, 422):
+                # Some servers answer 500 instead of 400 when they can't honour
+                # response_format; falling back to prompt-only output is always safe.
+                if has_format and status in (400, 422, 500):
                     fmt_type = payload["response_format"].get("type")
                     raise UnsupportedResponseFormatError(
                         f"Backend rejected response_format {fmt_type!r} "
@@ -134,7 +136,7 @@ class OpenAICompatClient:
                     )
                 if status not in RETRYABLE_STATUS:
                     raise LLMError(f"LLM backend returned HTTP {status}: {response.text[:500]}")
-                last_error = f"HTTP {status}"
+                last_error = f"HTTP {status}: {response.text[:300]}"
             if attempt < self.max_retries:
                 delay = retry_delay(attempt, response)
                 logger.info("LLM call failed (%s); retrying in %.1fs", last_error, delay)

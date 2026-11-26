@@ -113,8 +113,8 @@ fields:
       - {name: evidence, type: string, required: true, description: Verbatim quote}
 ```
 
-The tool builds a Pydantic model with `pydantic.create_model`, puts its JSON schema in the prompt and asks for structured output.
-It tries `response_format: json_schema` first, falls back to JSON mode, then to plain text with JSON parsing, and remembers what the backend supports.
+The tool builds a Pydantic model with `pydantic.create_model` and puts its JSON schema in the prompt. By default that is all it sends, so it works with any chat endpoint; the answer is parsed and validated, and invalid output gets one repair round with the validation errors.
+`LLM_OUTPUT_MODE=json_schema` (or `json_object`) also sends `response_format`, so servers that support constrained decoding enforce the schema. If the backend rejects it (HTTP 400, 422 or 500), the tool falls back towards plain text and remembers what works.
 If validation fails, the errors go back to the model for one repair round. A second failure is reported as an error, not patched over.
 Any string field named `evidence`, `source_text` or `quote` is checked against the trial text.
 With one top-level `list[object]` field, `--format csv` and `--format jsonl` write one row per item.
@@ -131,7 +131,7 @@ Any OpenAI-compatible chat completions API works. Temperature defaults to 0.
 | Ollama | `http://localhost:11434/v1` | e.g. `qwen2.5:7b-instruct` | empty |
 | OpenAI | `https://api.openai.com/v1` | e.g. `gpt-4o-mini` | your key |
 
-Other settings: `LLM_MAX_CONCURRENCY` (default 4), `LLM_TIMEOUT`, `LLM_MAX_RETRIES`, `LLM_MAX_TOKENS`. `LLM_EXTRA_BODY` takes a JSON object merged into each request, for backend-specific options: with Qwen3 on vLLM, `{"chat_template_kwargs": {"enable_thinking": false}}` turns off the thinking block (if it is left on, `<think>` blocks are stripped before parsing). Requests retry with backoff on 429 and 5xx. Token usage is logged (`-v`) and returned in every result.
+Other settings: `LLM_OUTPUT_MODE` (`text` by default, see [Using your own schema](#using-your-own-schema)), `LLM_MAX_CONCURRENCY` (default 4), `LLM_TIMEOUT`, `LLM_MAX_RETRIES`, `LLM_MAX_TOKENS`. `LLM_EXTRA_BODY` takes a JSON object merged into each request, for backend-specific options: with Qwen3 on vLLM, `{"chat_template_kwargs": {"enable_thinking": false}}` turns off the thinking block (if it is left on, `<think>` blocks are stripped before parsing). Requests retry with backoff on 429 and 5xx. Token usage is logged (`-v`) and returned in every result.
 
 ## Evidence validation
 

@@ -7,6 +7,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from ctgov_extract.config import OutputMode
 from ctgov_extract.evidence import EvidenceCheck, check_evidence_fields
 from ctgov_extract.llm.base import ChatMessage, LLMClient
 from ctgov_extract.llm.structured import StructuredGenerator
@@ -37,9 +38,15 @@ def _other_fields_text(record: TrialRecord) -> str:
 
 
 class CustomExtractor:
-    def __init__(self, client: LLMClient, *, generator: StructuredGenerator | None = None) -> None:
+    def __init__(
+        self,
+        client: LLMClient,
+        *,
+        generator: StructuredGenerator | None = None,
+        output_mode: OutputMode = "text",
+    ) -> None:
         self.client = client
-        self.generator = generator or StructuredGenerator(client)
+        self.generator = generator or StructuredGenerator(client, start_mode=output_mode)
 
     async def extract(self, record: TrialRecord, spec: SchemaSpec) -> CustomExtractionResult:
         started = time.perf_counter()

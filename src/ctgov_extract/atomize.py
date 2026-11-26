@@ -6,6 +6,7 @@ import asyncio
 import logging
 import time
 
+from ctgov_extract.config import OutputMode
 from ctgov_extract.criteria import split_criteria
 from ctgov_extract.errors import LLMError
 from ctgov_extract.evidence import validate_evidence
@@ -32,9 +33,15 @@ class CriteriaExtractor:
     cannot be validated is reported in ``failures`` and the rest still succeed.
     """
 
-    def __init__(self, client: LLMClient, *, generator: StructuredGenerator | None = None) -> None:
+    def __init__(
+        self,
+        client: LLMClient,
+        *,
+        generator: StructuredGenerator | None = None,
+        output_mode: OutputMode = "text",
+    ) -> None:
         self.client = client
-        self.generator = generator or StructuredGenerator(client)
+        self.generator = generator or StructuredGenerator(client, start_mode=output_mode)
         self._schema = AtomicDraftList.model_json_schema()
         self._system = atomic_system_prompt(self._schema)
 

@@ -108,6 +108,42 @@ def test_rejected_response_format_is_reported() -> None:
         asyncio.run(go())
 
 
+def test_server_error_on_response_format_triggers_fallback_without_retries() -> None:
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        return httpx.Response(500, text="guided decoding backend crashed")
+
+    async def go() -> None:
+        async with _client(httpx.MockTransport(handler)) as c:
+            await c.chat([ChatMessage("user", "hi")], response_format={"type": "json_schema"})
+
+    with pytest.raises(UnsupportedResponseFormatError, match="HTTP 500"):
+        asyncio.run(go())
+    assert calls == 1
+
+
+def test_exhausted_retries_include_backend_error_text() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503, text="model is loading")
+
+    async def go() -> None:
+        async with _client(httpx.MockTransport(handler), max_retries=1) as c:
+            await c.chat([ChatMessage("user", "hi")])
+
+    with pytest.raises(LLMError, match="HTTP 503: model is loading"):
+        asyncio.run(go())
+
+
+def test_output_mode_setting() -> None:
+    assert Settings.from_env({}).llm_output_mode == "text"
+    assert Settings.from_env({"LLM_OUTPUT_MODE": "JSON_SCHEMA"}).llm_output_mode == "json_schema"
+    with pytest.raises(ValueError, match="LLM_OUTPUT_MODE"):
+        Settings.from_env({"LLM_OUTPUT_MODE": "xml"})
+
+
 @pytest.mark.parametrize(
     ("response", "message"),
     [

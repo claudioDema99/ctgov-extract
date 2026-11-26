@@ -89,7 +89,7 @@ async def cmd_criteria(args: argparse.Namespace, settings: Settings) -> int:
     llm = build_llm_client(settings)
     try:
         record = await resolve_trial(args.trial, ctgov)
-        result = await CriteriaExtractor(llm).extract_text(
+        result = await CriteriaExtractor(llm, output_mode=settings.llm_output_mode).extract_text(
             record.eligibility_text,
             nct_id=record.nct_id,
             title=record.brief_title,
@@ -121,7 +121,9 @@ async def cmd_extract(args: argparse.Namespace, settings: Settings) -> int:
     llm = build_llm_client(settings)
     try:
         record = await resolve_trial(args.trial, ctgov)
-        result = await CustomExtractor(llm).extract(record, spec)
+        result = await CustomExtractor(llm, output_mode=settings.llm_output_mode).extract(
+            record, spec
+        )
     finally:
         await _close(ctgov)
         await _close(llm)
@@ -134,7 +136,7 @@ async def cmd_annotate(args: argparse.Namespace, settings: Settings) -> int:
     llm = build_llm_client(settings)
     try:
         record = await resolve_trial(args.trial, ctgov)
-        result = await CriteriaExtractor(llm).extract_text(
+        result = await CriteriaExtractor(llm, output_mode=settings.llm_output_mode).extract_text(
             record.eligibility_text,
             nct_id=record.nct_id,
             title=record.brief_title,
@@ -182,7 +184,7 @@ async def cmd_eval(args: argparse.Namespace, settings: Settings) -> int:
     else:
         llm = build_llm_client(settings)
         try:
-            extractor = CriteriaExtractor(llm)
+            extractor = CriteriaExtractor(llm, output_mode=settings.llm_output_mode)
             results = []
             for g in gold:  # sequential per trial, so latency numbers are per trial
                 logger.info("Extracting %s", g.nct_id)
