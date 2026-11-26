@@ -88,9 +88,6 @@ Enter an NCT ID or URL, choose default criteria or a custom schema, and click Ex
 Results show a trial summary, then inclusion and exclusion tables. Clicking a row highlights its evidence in the original eligibility text.
 Items whose evidence was not found are flagged.
 
-![Screenshot of the web UI](docs/screenshot.png)
-[TODO: add docs/screenshot.png]
-
 JSON endpoints: `GET /api/health`, `GET /api/trial/{id}`, `GET /api/schemas`, `POST /api/criteria` (`{"trial": "..."}`), `POST /api/extract` (`{"trial": "...", "schema_text": "..."}`).
 OpenAPI docs are at `/docs`.
 
@@ -157,7 +154,7 @@ ctgov-extract eval --gold eval/gold/*.jsonl --pred eval/out/pred.jsonl   # re-sc
 Reported: criterion-level precision, recall and F1 (matching by span overlap, fuzzy text as fallback), field accuracy on matched pairs (category, operator, value, value_max, unit, negated), evidence-not-found rate, failed criteria, latency and tokens.
 Drafts and synthetic records are skipped unless explicitly included.
 
-Results: [TODO: results after annotating N trials with model X]
+No results yet: the gold set has not been annotated, and I'd rather report nothing than numbers on model-written references.
 
 ## Design notes and limitations
 
@@ -170,9 +167,9 @@ Results: [TODO: results after annotating N trials with model X]
 
 ## Related work
 
-- Criteria2Query: parses eligibility criteria into OMOP CDM cohort queries. [Yuan et al., JAMIA 2019](https://doi.org/10.1093/jamia/ocy178) [TODO: verify description]
-- EliIE: information extraction for eligibility criteria (entities, attributes, relations, OMOP mapping). [Kang et al., JAMIA 2017](https://doi.org/10.1093/jamia/ocx019) [TODO: verify description]
-- TrialGPT: LLM-based patient-to-trial matching with criterion-level explanations. [Jin et al., Nature Communications 2024](https://doi.org/10.1038/s41467-024-53081-z) [TODO: verify description]
+- Criteria2Query: natural language interface for cohort definition; a hybrid ML and rule-based pipeline turns eligibility criteria into executable OMOP CDM queries. [Yuan et al., JAMIA 2019](https://doi.org/10.1093/jamia/ocy178)
+- EliIE: open-source information extraction for eligibility criteria (entity and attribute recognition, negation, relations, normalization to OMOP CDM), trained on 230 Alzheimer's trials. [Kang et al., JAMIA 2017](https://doi.org/10.1093/jamia/ocx019)
+- TrialGPT: zero-shot patient-to-trial matching with LLMs (retrieval, criterion-level eligibility with explanations, trial ranking). [Jin et al., Nature Communications 2024](https://doi.org/10.1038/s41467-024-53081-z)
 
 ## Development
 

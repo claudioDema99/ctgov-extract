@@ -49,7 +49,7 @@ One atomic criterion tests one concept against one condition.
 - Split two bounds stated separately for different time points only if they are different tests.
   "MMSE \>=22 at Screening and Baseline and \<=30 at Screening and Baseline" is one `between` item.
 - Two scales are two items, even in one sentence: "global CDR score of 0.5 and CDR Memory Box score of 0.5 or greater" is two.
-- Exceptions and carve-outs ("with the exception of basal cell carcinoma") get their own item with the opposite polarity and a `note` saying it is an exception. [TODO: confirm this rule after the first annotation batch.]
+- Exceptions and carve-outs ("with the exception of basal cell carcinoma") get their own item with the opposite polarity and a `note` saying it is an exception. (Provisional: to be confirmed after the first annotation batch.)
 - Administrative criteria (consent, study partner, ability to comply) are annotated with category `consent/administrative`.
 - A parent line that only introduces sub-items ("including any of the following:") is not annotated by itself.
 
@@ -71,7 +71,7 @@ One atomic criterion tests one concept against one condition.
 
 Biomarker vs. lab: both use `laboratory/biomarker`. Set `is_biomarker` true for molecular, genetic, imaging or fluid biomarkers, false for routine labs.
 Imaging biomarkers (amyloid PET positivity) use `laboratory/biomarker` with `is_biomarker` true.
-[TODO: decide whether ECOG and NYHA should move to a separate "performance status" category.]
+Open question: ECOG and NYHA may deserve a separate "performance status" category.
 
 ## Operators and values
 
@@ -79,7 +79,7 @@ Imaging biomarkers (amyloid PET positivity) use `laboratory/biomarker` with `is_
   "at least 18 years" is `>=` 18 `years`. "greater than (\>)17" is `>` 17.
 - Ranges: `between` with `value` (low) and `value_max` (high). Note exclusive bounds in `note`.
 - Things that must exist or must not exist: `present` / `absent`, `value` null.
-  For a status word ("HER2-positive"), use `present` and put the status in the concept or `value`: concept `HER2 status`, value `positive`. [TODO: pick one convention and apply it everywhere.]
+  For a status word ("HER2-positive"), use `present` and put the status in the concept or `value`: concept `HER2 status`, value `positive`. (Provisional: the convention still has to be applied consistently.)
 - `kind` already carries inclusion vs exclusion. Do not invert: an exclusion "History of stroke" is `kind: exclusion`, `operator: present`.
 
 ## Negation

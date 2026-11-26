@@ -2,7 +2,7 @@
 
 This folder is intentionally empty. The gold set will be annotated by hand by the author.
 
-[TODO: annotate N trials following `eval/ANNOTATION.md`, one JSONL file per batch, e.g. `eval/gold/batch-01.jsonl`.]
+Gold files follow `eval/ANNOTATION.md`, one JSONL file per batch, e.g. `eval/gold/batch-01.jsonl`.
 
 Workflow:
 
@@ -16,4 +16,4 @@ model output is never scored as if it were a reference.
 
 Model drafts start from the model's own answers, which can bias the reference towards the model.
 Note in the report how many items were changed during review.
-[TODO: decide whether to annotate a subset from scratch, without drafts, to measure this bias.]
+Open question: annotating a subset from scratch, without drafts, would measure this bias.
