@@ -88,6 +88,10 @@ Enter an NCT ID or URL, choose default criteria or a custom schema, and click Ex
 Results show a trial summary, then inclusion and exclusion tables. Clicking a row highlights its evidence in the original eligibility text.
 Items whose evidence was not found are flagged.
 
+![Web UI: trial summary and inclusion criteria extracted with a local Qwen model](docs/screenshot-criteria.jpg)
+
+![Exclusion criteria with the evidence quote for each item](docs/screenshot-exclusion.jpg)
+
 JSON endpoints: `GET /api/health`, `GET /api/trial/{id}`, `GET /api/schemas`, `POST /api/criteria` (`{"trial": "..."}`), `POST /api/extract` (`{"trial": "...", "schema_text": "..."}`).
 OpenAPI docs are at `/docs`.
 
